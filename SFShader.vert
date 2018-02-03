@@ -1,5 +1,9 @@
+// Final
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+float getBrightness(vec3 t_color) {
+    return max(max(t_color.r, t_color.g), t_color.b);
 }
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
@@ -18,7 +22,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     // move
     shiftedUV.x += sin(iTime) / 99.0;
-    shiftedUV.y += cos(iTime) / 110.0;
+    shiftedUV.y += cos(iTime) / 101.0;
     
     // create texture by the shifted uv
     vec3 shifted = texture( iChannel0, shiftedUV).xyz;
@@ -29,18 +33,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // decide what to print depends on the distance from the center point
     float d = distance(fragCoord, screenCenter);
     
-	if( mod(rand(shiftedUV) * 25.0, 30.0) < 0.2 )
-       	// white noise
-        fragColor = vec4(mix(vec3(1.0,1.0,1.0), shifted, 0.7), 1.0);
-    
-    else if (mod(d, 30.0) < 15.0 )
-        // shifted uv
+    // draw texture in stripes
+	if (mod(d, 30.0) < 15.0 )
 		fragColor = vec4(mix(shifted, original, 0.5), 1);  
-        
     else
-        // original uv
     	fragColor = vec4(original,1);
-        
-        // debug code
-        //fragColor = vec4(vec3(0.0,0.0,0.0),1);
+    
+    // paint edge to be blue and purple
+    if (getBrightness(original) * 2.5 < getBrightness(shifted)) {
+        fragColor = mix(fragColor, vec4(vec3(original.y * 5.0, 0, 200.0),0.5), 0.001);
+    }
 }
